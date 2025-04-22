@@ -1,58 +1,27 @@
-import '../models/product.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class ProductService {
-  static List<Product> getProducts() {
-    return [
-      Product(
-        id: 1,
-        name: 'Lenovo Ideapad 3',
-        description: "15.6'' laptop with AMD Ryzen 5 processor and 8GB RAM",
-        brand: 'Lenovo',
-        price: 549.99,
-        stock: 25,
-        available: true,
-        freeShipping: true,
-      ),
-      Product(
-        id: 2,
-        name: 'Samsung Galaxy A54',
-        description: 'Mid-range Android phone with 5G and AMOLED display',
-        brand: 'Samsung',
-        price: 379,
-        stock: 50,
-        available: true,
-        freeShipping: false,
-      ),
-      Product(
-        id: 3,
-        name: 'Logitech MX Master 3S',
-        description: 'Ergonomic wireless mouse with USB-C fast charging',
-        brand: 'Logitech',
-        price: 99.95,
-        stock: 120,
-        available: true,
-        freeShipping: true,
-      ),
-      Product(
-        id: 4,
-        name: 'Sony WH-1000XM5',
-        description: 'High-end noise cancelling wireless headphones',
-        brand: 'Sony',
-        price: 399.99,
-        stock: 10,
-        available: false,
-        freeShipping: false,
-      ),
-      Product(
-        id: 5,
-        name: 'HP OfficeJet Pro 9025e',
-        description: 'All-in-one printer for office use with smart features',
-        brand: 'HP',
-        price: 229.9,
-        stock: 5,
-        available: true,
-        freeShipping: false,
-      ),
-    ];
+  final String _url = 'https://library-app-2019112027.azurewebsites.net/api/products';
+
+  Future<List<dynamic>> getAllProducts() async {
+    final response = await http.get(Uri.parse(_url));
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('Error al obtener productos');
+    }
+  }
+
+  Future<void> addProduct(Map<String, dynamic> productData) async {
+    final response = await http.post(
+      Uri.parse(_url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(productData),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Error al agregar producto');
+    }
   }
 }
