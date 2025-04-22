@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
                 final p = products[index];
                 return ListTile(
                   title: Text(p['name'] ?? 'Sin nombre'),
-                  subtitle: Text('Precio: \$${p['price'] ?? '0.0'}'),
+                  subtitle: Text('Precio: \$${p['price']?.toString() ?? '0.0'}'),
                 );
               },
             );
