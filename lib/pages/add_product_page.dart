@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../services/product_service.dart';
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -10,29 +11,37 @@ class AddProductPage extends StatefulWidget {
 
 class _AddProductPageState extends State<AddProductPage> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _brandController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _stockController = TextEditingController();
-  bool _available = true;
-  bool _freeShipping = false;
+  String name = '';
+  String description = '';
+  String brand = '';
+  double price = 0.0;
+  int stock = 0;
+  bool available = false;
+  bool freeShipping = false;
 
-  int _generateId() => DateTime.now().millisecondsSinceEpoch;
-
-  void _submitForm() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
-      final newProduct = Product(
-        id: _generateId(),
-        name: _nameController.text,
-        description: _descriptionController.text,
-        brand: _brandController.text,
-        price: double.parse(_priceController.text),
-        stock: int.parse(_stockController.text),
-        available: _available,
-        freeShipping: _freeShipping,
+      _formKey.currentState!.save();
+
+      final product = Product(
+        name: name,
+        description: description,
+        brand: brand,
+        price: price,
+        stock: stock,
+        available: available,
+        freeShipping: freeShipping,
       );
-      Navigator.pop(context, newProduct);
+
+      final success = await ProductService.addProduct(product);
+
+      if (success) {
+        Navigator.pop(context);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Error al subir el producto')),
+        );
+      }
     }
   }
 
@@ -41,52 +50,57 @@ class _AddProductPageState extends State<AddProductPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('Agregar Producto')),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
               TextFormField(
-                controller: _nameController,
                 decoration: const InputDecoration(labelText: 'Nombre'),
-                validator: (value) => value!.isEmpty ? 'Requerido' : null,
+                onSaved: (value) => name = value ?? '',
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese un nombre' : null,
               ),
               TextFormField(
-                controller: _descriptionController,
                 decoration: const InputDecoration(labelText: 'Descripción'),
-                validator: (value) => value!.isEmpty ? 'Requerido' : null,
+                onSaved: (value) => description = value ?? '',
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese una descripción' : null,
               ),
               TextFormField(
-                controller: _brandController,
                 decoration: const InputDecoration(labelText: 'Marca'),
-                validator: (value) => value!.isEmpty ? 'Requerido' : null,
+                onSaved: (value) => brand = value ?? '',
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese una marca' : null,
               ),
               TextFormField(
-                controller: _priceController,
                 decoration: const InputDecoration(labelText: 'Precio'),
                 keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Requerido' : null,
+                onSaved: (value) => price = double.tryParse(value ?? '0') ?? 0,
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese un precio' : null,
               ),
               TextFormField(
-                controller: _stockController,
                 decoration: const InputDecoration(labelText: 'Stock'),
                 keyboardType: TextInputType.number,
-                validator: (value) => value!.isEmpty ? 'Requerido' : null,
+                onSaved: (value) => stock = int.tryParse(value ?? '0') ?? 0,
+                validator: (value) =>
+                    value!.isEmpty ? 'Ingrese stock' : null,
               ),
               SwitchListTile(
                 title: const Text('Disponible'),
-                value: _available,
-                onChanged: (val) => setState(() => _available = val),
+                value: available,
+                onChanged: (value) => setState(() => available = value),
               ),
               SwitchListTile(
-                title: const Text('Envío Gratis'),
-                value: _freeShipping,
-                onChanged: (val) => setState(() => _freeShipping = val),
+                title: const Text('Envío gratis'),
+                value: freeShipping,
+                onChanged: (value) => setState(() => freeShipping = value),
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Agregar'),
+                onPressed: _submit,
+                child: const Text('Agregar producto'),
               ),
             ],
           ),
