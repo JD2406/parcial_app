@@ -1,5 +1,5 @@
 class Product {
-  final int id;
+  final int? id;
   final String name;
   final String description;
   final String brand;
@@ -9,7 +9,7 @@ class Product {
   final bool freeShipping;
 
   Product({
-    required this.id,
+    this.id,
     required this.name,
     required this.description,
     required this.brand,
@@ -25,21 +25,22 @@ class Product {
       name: json['name'],
       description: json['description'],
       brand: json['brand'],
-      price: json['price'].toDouble(),
-      stock: json['stock'],
-      available: json['available'],
-      freeShipping: json['freeShipping'],
+      price: double.tryParse(json['price'].toString()) ?? 0.0,
+      stock: json['stock'] ?? 0,
+      available: json['available'] ?? false,
+      freeShipping: json['freeShipping'] ?? false,
     );
   }
 
-  Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'description': description,
-    'brand': brand,
-    'price': price,
-    'stock': stock,
-    'available': available,
-    'freeShipping': freeShipping,
-  };
+  Map<String, dynamic> toJson() {
+    return {
+      "name": name,
+      "description": description,
+      "brand": brand,
+      "price": price,
+      "stock": stock,
+      "available": available,
+      "freeShipping": freeShipping,
+    };
+  }
 }
