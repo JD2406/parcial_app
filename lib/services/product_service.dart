@@ -1,27 +1,28 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/product.dart';
 
 class ProductService {
-  final String _url = 'https://library-app-2019112027.azurewebsites.net/api/products';
+  static Future<List<Product>> getProducts() async {
+    final response = await http.get(
+      Uri.parse('https://library-app-2019112027.azurewebsites.net/api/products'),
+    );
 
-  Future<List<dynamic>> getAllProducts() async {
-    final response = await http.get(Uri.parse(_url));
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => Product.fromJson(json)).toList();
     } else {
-      throw Exception('Error al obtener productos');
+      throw Exception('Error al cargar productos');
     }
   }
 
-  Future<void> addProduct(Map<String, dynamic> productData) async {
+  static Future<bool> addProduct(Product product) async {
     final response = await http.post(
-      Uri.parse(_url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(productData),
+      Uri.parse('https://library-app-2019112027.azurewebsites.net/api/products'),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode(product.toJson()),
     );
 
-    if (response.statusCode != 201) {
-      throw Exception('Error al agregar producto');
-    }
+    return response.statusCode == 201;
   }
 }
